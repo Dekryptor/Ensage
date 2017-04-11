@@ -7,10 +7,15 @@ namespace Sniper.Orbwalking
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
 
     using Ensage;
     using Ensage.Common.Menu;
     using Ensage.SDK.Extensions;
+
+    using log4net;
+
+    using PlaySharp.Toolkit.Logging;
 
     using SharpDX;
 
@@ -123,6 +128,8 @@ namespace Sniper.Orbwalking
             return Game.RawGameTime - 0.1f + Game.Ping / 2000f - this.LastAttackTime > this.Owner.AttackPoint();
         }
 
+        private static readonly ILog Log = AssemblyLogs.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
         private IEnumerable<Unit> GetTargets(Menu menu)
         {
             var prefix = menu.Name;
@@ -193,7 +200,7 @@ namespace Sniper.Orbwalking
 
             this._Initialized = true;
 
-            this.menu = new Menu("Sniper#", "Sniper#", true);
+            this.menu = new Menu("Orbwalker BETA", "Orbwalker BETA", true);
 
             this.hotkeys = this.menu.AddSubMenu(new Menu("Hotkeys", "Hotkeys"));
             this.Combo = hotkeys.AddItem(new MenuItem("Hotkeys.Combo", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
@@ -297,64 +304,71 @@ namespace Sniper.Orbwalking
 
         private void GameDispatcherOnOnIngameUpdate(EventArgs args)
         {
-            this.Mode = OrbwalkingMode.None;
+            try
+            {
+                this.Mode = OrbwalkingMode.None;
 
-            this.Owner.DrawRange("attackRange", this.Owner.AttackRange(this.Owner));
+                this.Owner.DrawRange("attackRange", this.Owner.AttackRange(this.Owner));
 
-            // no spamerino
-            if (Game.IsPaused || Game.IsChatOpen)
-            {
-                return;
-            }
+                // no spamerino
+                if (Game.IsPaused || Game.IsChatOpen)
+                {
+                    return;
+                }
 
-            Unit target = null;
+                Unit target = null;
 
-            if (this.Combo.IsActive())
-            {
-                this.Mode = OrbwalkingMode.Combo;
-                target = this.GetTargets(this.comboMenu).FirstOrDefault();
-            }
-            else if (this.Clear.IsActive())
-            {
-                this.Mode = OrbwalkingMode.LaneClear;
-                target = this.GetTargets(this.clearMenu).FirstOrDefault();
-            }
-            else if (this.Mixed.IsActive())
-            {
-                this.Mode = OrbwalkingMode.Mixed;
-                target = this.GetTargets(this.mixedMenu).FirstOrDefault();
-            }
-            else if (this.Farm.IsActive())
-            {
-                this.Mode = OrbwalkingMode.LastHit;
-                target = this.GetTargets(this.farmMenu).FirstOrDefault();
-            }
-            else if (this.Deny.IsActive())
-            {
-                this.Mode = OrbwalkingMode.Deny;
-                target = this.GetTargets(this.denyMenu).FirstOrDefault();
-            }
+                if (this.Combo.IsActive())
+                {
+                    this.Mode = OrbwalkingMode.Combo;
+                    target = this.GetTargets(this.comboMenu).FirstOrDefault();
+                }
+                else if (this.Clear.IsActive())
+                {
+                    this.Mode = OrbwalkingMode.LaneClear;
+                    target = this.GetTargets(this.clearMenu).FirstOrDefault();
+                }
+                else if (this.Mixed.IsActive())
+                {
+                    this.Mode = OrbwalkingMode.Mixed;
+                    target = this.GetTargets(this.mixedMenu).FirstOrDefault();
+                }
+                else if (this.Farm.IsActive())
+                {
+                    this.Mode = OrbwalkingMode.LastHit;
+                    target = this.GetTargets(this.farmMenu).FirstOrDefault();
+                }
+                else if (this.Deny.IsActive())
+                {
+                    this.Mode = OrbwalkingMode.Deny;
+                    target = this.GetTargets(this.denyMenu).FirstOrDefault();
+                }
 
-            if (this.Mode == OrbwalkingMode.None)
-            {
-                return;
-            }
+                if (this.Mode == OrbwalkingMode.None)
+                {
+                    return;
+                }
 
-            // turning
-            if (this.TurnEndTime > Game.RawGameTime)
-            {
-                return;
-            }
+                // turning
+                if (this.TurnEndTime > Game.RawGameTime)
+                {
+                    return;
+                }
 
-            if ((target == null || !this.CanAttack(target)) && this.CanMove())
-            {
-                this.Move(Game.MousePosition);
-                return;
-            }
+                if ((target == null || !this.CanAttack(target)) && this.CanMove())
+                {
+                    this.Move(Game.MousePosition);
+                    return;
+                }
 
-            if (target != null && this.CanAttack(target))
+                if (target != null && this.CanAttack(target))
+                {
+                    this.Attack(target);
+                }
+            }
+            catch (Exception e)
             {
-                this.Attack(target);
+                Log.Error(e);
             }
         }
 
@@ -364,9 +378,7 @@ namespace Sniper.Orbwalking
             var barracks =
                 ObjectManager.GetEntitiesParallel<Building>()
                              .Where(
-                                 unit =>
-                                     unit.IsValid && this.Owner.CanAttack(unit)
-                                     && this.Owner.IsValidOrbwalkingTarget(unit))
+                                 unit =>this.Owner.IsValidOrbwalkingTarget(unit))
                              .OfType<Unit>();
 
             return barracks;
@@ -389,8 +401,7 @@ namespace Sniper.Orbwalking
                 ObjectManager.GetEntitiesParallel<Hero>()
                              .Where(
                                  unit =>
-                                     unit.IsValid && this.Owner.CanAttack(unit)
-                                     && this.Owner.IsValidOrbwalkingTarget(unit)
+                                     this.Owner.IsValidOrbwalkingTarget(unit) && unit.Team != this.Owner.Team
                                      && unit.Distance2D(Game.MousePosition) < 2000)
                              .OrderByDescending(unit => unit.Distance2D(Game.MousePosition))
                              .OfType<Unit>();
@@ -406,8 +417,7 @@ namespace Sniper.Orbwalking
                             .GetCreeps()
                             .Where(
                                 unit =>
-                                    unit.IsValid && this.Owner.CanAttack(unit)
-                                    && this.Owner.IsValidOrbwalkingTarget(unit) && unit.IsNeutral);
+                                    this.Owner.IsValidOrbwalkingTarget(unit) && unit.IsNeutral);
 
             return jungleMob;
         }
@@ -420,8 +430,7 @@ namespace Sniper.Orbwalking
                             .GetCreeps()
                             .Where(
                                 unit =>
-                                    unit.IsValid && this.Owner.CanAttack(unit)
-                                    && this.Owner.IsValidOrbwalkingTarget(unit)
+                                    this.Owner.IsValidOrbwalkingTarget(unit)
                                     && HealthPrediction.Instance()
                                                        .GetPredictedHealth(
                                                            unit,
@@ -492,9 +501,7 @@ namespace Sniper.Orbwalking
             var tower =
                 ObjectManager.GetEntitiesParallel<Tower>()
                              .Where(
-                                 unit =>
-                                     unit.IsValid && this.Owner.CanAttack(unit)
-                                     && this.Owner.IsValidOrbwalkingTarget(unit))
+                                 unit =>this.Owner.IsValidOrbwalkingTarget(unit))
                              .OfType<Unit>();
 
             return tower;

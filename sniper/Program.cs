@@ -4,28 +4,35 @@
 
 namespace Sniper
 {
-    using System;
+    using System.Reflection;
 
-    using Ensage;
+    using Ensage.SDK.Service;
+
+    using log4net;
+
+    using PlaySharp.Toolkit.Logging;
 
     using Sniper.Orbwalking;
 
-    class Program
+    [ExportAssembly("Sniper")]
+    public class EntryPoint : IAssemblyLoader
+    {
+        private static readonly ILog Log = AssemblyLogs.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
+        public void Activate()
+        {
+            Orbwalker.Instance().Load();
+        }
+
+        public void Deactivate()
+        {
+        }
+    }
+
+    internal class Program
     {
         public static void Main()
         {
-            Game.OnIngameUpdate += OnLoad;
-        }
-
-        private static void OnLoad(EventArgs args)
-        {
-            if (ObjectManager.LocalHero == null)
-            {
-                return;
-            }
-
-            Game.OnIngameUpdate -= OnLoad;
-            Orbwalker.Instance().Load();
         }
     }
 }

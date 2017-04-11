@@ -42,6 +42,9 @@
     <Reference Include="Ensage.Common">
       <HintPath>D:\Games\ps\References\Ensage.Common.dll</HintPath>
     </Reference>
+    <Reference Include="Ensage.SDK">
+      <HintPath>D:\Games\ps\References\Ensage.SDK.dll</HintPath>
+    </Reference>
     <Reference Include="PlaySharp.Toolkit">
       <HintPath>D:\Games\ps\References\PlaySharp.Toolkit.dll</HintPath>
     </Reference>
@@ -49,26 +52,11 @@
       <HintPath>D:\Games\ps\References\SharpDX.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions\AbilityExtensions.cs" />
-    <Compile Include="Extensions\AnimationExtensions.cs" />
-    <Compile Include="Extensions\EntityExtensions.cs" />
-    <Compile Include="Extensions\HeroExtensions.cs" />
-    <Compile Include="Extensions\PropertyExtensions.cs" />
-    <Compile Include="Extensions\SharpDXExtensions.cs" />
-    <Compile Include="Extensions\TypeExtensions.cs" />
-    <Compile Include="Extensions\UnitExtensions.cs" />
-    <Compile Include="Extensions\Vector2Extensions.cs" />
-    <Compile Include="Extensions\Vector3Extensions.cs" />
-    <Compile Include="Extensions\Vector4Extensions.cs" />
-    <Compile Include="Geometry\Geometry.cs" />
-    <Compile Include="Geometry\IntersectionResult.cs" />
-    <Compile Include="Geometry\MovementCollisionInfo.cs" />
-    <Compile Include="Geometry\Polygon.cs" />
-    <Compile Include="Geometry\ProjectionInfo.cs" />
     <Compile Include="Helpers\CircularIndicatorHelper.cs" />
     <Compile Include="Helpers\DamageHelpers.cs" />
     <Compile Include="Helpers\EntityOrPosition.cs" />
