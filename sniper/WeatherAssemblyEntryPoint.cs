@@ -54,7 +54,7 @@ namespace Sniper
 
         private void OnValueChanged(object sender, OnValueChangeEventArgs args)
         {
-            this.Weather = this.SelectedWeather.Value.SelectedIndex;
+            this.Weather = args.GetNewValue<StringList>().SelectedIndex;
         }
     }
 }
