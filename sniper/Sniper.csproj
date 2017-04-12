@@ -33,20 +33,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="clipper_library">
-      <HintPath>D:\Games\ps\References\clipper_library.dll</HintPath>
-    </Reference>
-    <Reference Include="Ensage">
+    <Reference Include="Ensage, Version=0.0.0.1, Culture=neutral, PublicKeyToken=a41ba14f653257a6, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>D:\Games\ps\References\Ensage.dll</HintPath>
-    </Reference>
-    <Reference Include="Ensage.Common">
-      <HintPath>D:\Games\ps\References\Ensage.Common.dll</HintPath>
     </Reference>
     <Reference Include="Ensage.SDK">
       <HintPath>D:\Games\ps\References\Ensage.SDK.dll</HintPath>
-    </Reference>
-    <Reference Include="PlaySharp.Toolkit">
-      <HintPath>D:\Games\ps\References\PlaySharp.Toolkit.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Mathematics">
       <HintPath>D:\Games\ps\References\SharpDX.Mathematics.dll</HintPath>
@@ -57,14 +49,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Helpers\CircularIndicatorHelper.cs" />
-    <Compile Include="Helpers\DamageHelpers.cs" />
-    <Compile Include="Helpers\EntityOrPosition.cs" />
-    <Compile Include="Managers\CreepManager.cs" />
-    <Compile Include="Orbwalking\OrbwalkingMode.cs" />
-    <Compile Include="Orbwalking\HealthPrediction.cs" />
-    <Compile Include="Orbwalking\Orbwalker.cs" />
-    <Compile Include="Orbwalking\OrbwalkerExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

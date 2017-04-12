@@ -4,21 +4,12 @@
 
 namespace Sniper
 {
-    using System.Reflection;
-
+    using Ensage.SDK.Orbwalker;
     using Ensage.SDK.Service;
-
-    using log4net;
-
-    using PlaySharp.Toolkit.Logging;
-
-    using Sniper.Orbwalking;
 
     [ExportAssembly("Sniper")]
     public class EntryPoint : IAssemblyLoader
     {
-        private static readonly ILog Log = AssemblyLogs.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-
         public void Activate()
         {
             Orbwalker.Instance().Load();
