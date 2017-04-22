@@ -50,6 +50,7 @@ namespace Sniper
         public void Deactivate()
         {
             this.SelectedWeather.Item.ValueChanged -= this.OnValueChanged;
+            this.Factory.Parent.RemoveFromMainMenu();
         }
 
         private void OnValueChanged(object sender, OnValueChangeEventArgs args)
