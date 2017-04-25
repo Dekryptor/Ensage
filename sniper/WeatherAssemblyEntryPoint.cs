@@ -5,57 +5,84 @@
 namespace Sniper
 {
     using System;
+    using System.Linq;
+    using System.Reflection;
 
     using Ensage;
-    using Ensage.Common.Menu;
+    using Ensage.Common.Extensions;
+    using Ensage.SDK.Extensions;
     using Ensage.SDK.Menu;
     using Ensage.SDK.Service;
 
-    [ExportAssembly("Weather Assembly")]
-    public class WeatherAssemblyEntryPoint : IAssemblyLoader
+    using log4net;
+
+    using PlaySharp.Toolkit.Logging;
+
+    [ExportAssembly("Dagon")]
+    public class DagonEntryPoint : IAssemblyLoader
     {
-        public WeatherAssemblyEntryPoint()
+        private static readonly ILog Log = AssemblyLogs.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
+        public DagonEntryPoint()
         {
-            this.Factory = MenuFactory.Create("Weather Assembly");
-            this.SelectedWeather = this.Factory.Item("Weather", new StringList(Enum.GetNames(typeof(WeatherType))));
+            this.Hero = ObjectManager.LocalHero;
+            this.Factory = MenuFactory.Create("Dagon");
+            this.Use = this.Factory.Item("Enable Dagon killsteal", false);
         }
 
         public MenuFactory Factory { get; }
 
-        public MenuItem<StringList> SelectedWeather { get; }
+        public Hero Hero { get; }
 
-        public int Weather
-        {
-            get
-            {
-                var var = Game.GetConsoleVar("cl_weather");
-                var.RemoveFlags(ConVarFlags.Cheat);
-                return var.GetInt();
-            }
-
-            set
-            {
-                var var = Game.GetConsoleVar("cl_weather");
-                var.RemoveFlags(ConVarFlags.Cheat);
-                var.SetValue(value);
-            }
-        }
+        public MenuItem<bool> Use { get; }
 
         public void Activate()
         {
-            this.Weather = this.SelectedWeather.Value.SelectedIndex;
-            this.SelectedWeather.Item.ValueChanged += this.OnValueChanged;
+            Game.OnIngameUpdate += this.OnUpdate;
         }
 
         public void Deactivate()
         {
-            this.SelectedWeather.Item.ValueChanged -= this.OnValueChanged;
+            Game.OnIngameUpdate -= this.OnUpdate;
             this.Factory.Parent.RemoveFromMainMenu();
         }
 
-        private void OnValueChanged(object sender, OnValueChangeEventArgs args)
+        public Item GetDagon()
         {
-            this.Weather = args.GetNewValue<StringList>().SelectedIndex;
+            return this.Hero.Inventory.Items.FirstOrDefault(x => x.Name.StartsWith("item_dagon"));
+        }
+
+        private float GetDamage(Item item, Unit target)
+        {
+            var index = item.Name.Length == 10 ? 0 : uint.Parse(item.Name.Substring(11)) - 1;
+            var damage = item.AbilitySpecialData.First(x => x.Name == "damage").GetValue(index);
+            return this.Hero.CalculateSpellDamage(target, DamageType.Magical, damage);
+        }
+
+        private void OnUpdate(EventArgs args)
+        {
+            if (!this.Hero.IsAlive || Game.IsPaused)
+            {
+                return;
+            }
+
+            var dagon = this.GetDagon();
+
+            if (dagon == null || !dagon.CanBeCasted())
+            {
+                return;
+            }
+
+            var target = ObjectManager.GetEntitiesFast<Hero>()
+                                      .FirstOrDefault(
+                                          h => this.Hero.CanAttack(h) &&
+                                               dagon.CanBeCasted(h) && dagon.CanHit(h) &&
+                                               this.GetDamage(dagon, h) > h.Health);
+
+            if (target != null)
+            {
+                dagon.UseAbility(target);
+            }
         }
     }
 }

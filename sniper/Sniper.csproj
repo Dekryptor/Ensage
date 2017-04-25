@@ -44,6 +44,10 @@
     <Reference Include="Ensage.SDK">
       <HintPath>D:\Games\ps\References\Ensage.SDK.dll</HintPath>
     </Reference>
+    <Reference Include="PlaySharp.Toolkit, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7e3dc52b16ce4f66, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Games\ps\References\PlaySharp.Toolkit.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDX.Mathematics">
       <HintPath>D:\Games\ps\References\SharpDX.Mathematics.dll</HintPath>
     </Reference>
