@@ -244,7 +244,7 @@ namespace Sniper.Orbwalking
 
             this.Initialized = true;
 
-            UpdateManager.Subscribe(this.OnDrawingsUpdate, 250);
+            UpdateManager.Subscribe(this.OnDrawingsUpdate, 1000);
             this.EffectManager = new ParticleEffectManager();
 
             HealthPrediction.Instance().Load();
@@ -344,6 +344,15 @@ namespace Sniper.Orbwalking
                 this.LastTarget = target;
                 this.Attack(target);
             }
+
+            if (this.LastTarget != null && this.LastTarget.IsValid && this.LastTarget.IsAlive)
+            {
+                this.EffectManager.DrawRange(this.LastTarget, "attackTarget", 60, Color.Red);
+            }
+            else
+            {
+                this.EffectManager.Remove("attackTarget");
+            }
         }
 
         private void Hero_OnInt32PropertyChange(Entity sender, Int32PropertyChangeEventArgs args)
@@ -370,15 +379,6 @@ namespace Sniper.Orbwalking
         private void OnDrawingsUpdate()
         {
             this.EffectManager.DrawRange(ObjectManager.LocalHero, "attackRange", this.Owner.AttackRange(this.Owner), Color.LimeGreen);
-
-            if (this.LastTarget != null && this.LastTarget.IsValid && this.LastTarget.IsAlive)
-            {
-                this.EffectManager.DrawRange(this.LastTarget, "attackTarget", 60, Color.Red);
-            }
-            else
-            {
-                this.EffectManager.Remove("attackTarget");
-            }
         }
 
         private bool ShouldWait()
