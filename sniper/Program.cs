@@ -4,9 +4,8 @@
 
 namespace Sniper
 {
-    using System;
-
     using Ensage;
+    using Ensage.SDK.Helpers;
 
     using Sniper.Orbwalking;
 
@@ -14,17 +13,17 @@ namespace Sniper
     {
         public static void Main()
         {
-            Game.OnIngameUpdate += OnLoad;
+            UpdateManager.Subscribe(OnLoad);
         }
 
-        private static void OnLoad(EventArgs args)
+        private static void OnLoad()
         {
             if (ObjectManager.LocalHero == null)
             {
                 return;
             }
 
-            Game.OnIngameUpdate -= OnLoad;
+            UpdateManager.Unsubscribe(OnLoad);
             Orbwalker.Instance().Load();
         }
     }

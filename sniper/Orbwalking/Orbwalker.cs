@@ -11,11 +11,11 @@ namespace Sniper.Orbwalking
     using Ensage;
     using Ensage.Common.Menu;
     using Ensage.SDK.Extensions;
+    using Ensage.SDK.Helpers;
     using Ensage.SDK.Menu;
 
     using SharpDX;
 
-    using Sniper.Helpers;
     using Sniper.Managers;
 
     internal class Orbwalker
@@ -70,6 +70,8 @@ namespace Sniper.Orbwalking
 
         public float LastMoveOrderIssuedTime { get; set; }
 
+        public Unit LastTarget { get; set; }
+
         public MenuItem<KeyBind> Mixed { get; set; }
 
         public MenuItem<Slider> MoveDelay { get; set; }
@@ -79,6 +81,8 @@ namespace Sniper.Orbwalking
         public Unit Owner { get; set; }
 
         public float TurnEndTime { get; set; }
+
+        private ParticleEffectManager EffectManager { get; set; }
 
         private bool Initialized { get; set; }
 
@@ -239,9 +243,14 @@ namespace Sniper.Orbwalking
             }
 
             this.Initialized = true;
+
+            UpdateManager.Subscribe(this.OnDrawingsUpdate, 250);
+            this.EffectManager = new ParticleEffectManager();
+
             HealthPrediction.Instance().Load();
             Game.OnIngameUpdate += this.GameDispatcherOnOnIngameUpdate;
             Entity.OnInt32PropertyChange += this.Hero_OnInt32PropertyChange;
+
             return true;
         }
 
@@ -274,9 +283,12 @@ namespace Sniper.Orbwalking
 
             this.Initialized = false;
 
+            UpdateManager.Unsubscribe(this.OnDrawingsUpdate);
             HealthPrediction.Instance().Unload();
             Game.OnIngameUpdate -= this.GameDispatcherOnOnIngameUpdate;
             Entity.OnInt32PropertyChange -= this.Hero_OnInt32PropertyChange;
+
+            this.EffectManager?.Dispose();
 
             return true;
         }
@@ -284,8 +296,6 @@ namespace Sniper.Orbwalking
         private void GameDispatcherOnOnIngameUpdate(EventArgs args)
         {
             this.Mode = OrbwalkingMode.None;
-
-            this.Owner.DrawRange("attackRange", this.Owner.AttackRange(this.Owner));
 
             // no spamerino
             if (Game.IsPaused || Game.IsChatOpen)
@@ -322,6 +332,7 @@ namespace Sniper.Orbwalking
             }
 
             var target = this.GetTarget();
+
             if ((target == null || !this.CanAttack(target)) && this.CanMove())
             {
                 this.Move(Game.MousePosition);
@@ -330,6 +341,7 @@ namespace Sniper.Orbwalking
 
             if (target != null && this.CanAttack(target))
             {
+                this.LastTarget = target;
                 this.Attack(target);
             }
         }
@@ -352,6 +364,20 @@ namespace Sniper.Orbwalking
             {
                 var diff = Game.RawGameTime - this.LastAttackTime;
                 this.LastAttackTime = Game.RawGameTime - (Game.Ping / 2000f);
+            }
+        }
+
+        private void OnDrawingsUpdate()
+        {
+            this.EffectManager.DrawRange(ObjectManager.LocalHero, "attackRange", this.Owner.AttackRange(this.Owner), Color.LimeGreen);
+
+            if (this.LastTarget != null && this.LastTarget.IsValid && this.LastTarget.IsAlive)
+            {
+                this.EffectManager.DrawRange(this.LastTarget, "attackTarget", 60, Color.Red);
+            }
+            else
+            {
+                this.EffectManager.Remove("attackTarget");
             }
         }
 
