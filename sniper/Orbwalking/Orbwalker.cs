@@ -13,6 +13,7 @@ namespace Sniper.Orbwalking
     using Ensage.SDK.Extensions;
     using Ensage.SDK.Helpers;
     using Ensage.SDK.Menu;
+    using Ensage.SDK.Renderer.Particle;
 
     using SharpDX;
 
