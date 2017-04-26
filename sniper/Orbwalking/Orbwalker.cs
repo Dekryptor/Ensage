@@ -83,7 +83,7 @@ namespace Sniper.Orbwalking
 
         public float TurnEndTime { get; set; }
 
-        private ParticleEffectManager EffectManager { get; set; }
+        private IParticleManager EffectManager { get; set; }
 
         private bool Initialized { get; set; }
 
@@ -246,7 +246,7 @@ namespace Sniper.Orbwalking
             this.Initialized = true;
 
             UpdateManager.Subscribe(this.OnDrawingsUpdate, 1000);
-            this.EffectManager = new ParticleEffectManager();
+            this.EffectManager = new ParticleManager();
 
             HealthPrediction.Instance().Load();
             Game.OnIngameUpdate += this.GameDispatcherOnOnIngameUpdate;
