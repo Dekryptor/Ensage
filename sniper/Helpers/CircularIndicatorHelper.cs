@@ -10,13 +10,6 @@ namespace Sniper.Helpers
 
     using SharpDX;
 
-    public class CircularIndicator
-    {
-        public ParticleEffect Effect { get; set; }
-
-        public float Range { get; set; }
-    }
-
     public static class CircularIndicatorHelper
     {
         private static Dictionary<string, CircularIndicator> CircleIndicators = new Dictionary<string, CircularIndicator>();
